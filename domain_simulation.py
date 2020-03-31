@@ -14,7 +14,7 @@ class DomainSimulation:
 
     # randomly generate obstacles for the map, given the number of required obstacles.
     def place_obstacles(self, num_obstacles):
-        for i in range(num_obstacles):
+        for _ in range(num_obstacles):
             obstacle_centre = (random.randint(0, SIZE), random.randint(0, SIZE))
             obstacle_size = (random.randint(10, 50), random.randint(10, 50))
             half_width, half_height = int(obstacle_size[0]/2), int(obstacle_size[1]/2)
@@ -22,9 +22,9 @@ class DomainSimulation:
             obstacle_borders = (max(0, obstacle_centre[0] - half_width), min(SIZE, obstacle_centre[0] + half_width),
                                 max(0, obstacle_centre[1] - half_height), min(SIZE, obstacle_centre[1] + half_height))
 
-            for i in range(obstacle_borders[0], obstacle_borders[1]):
-                for j in range(obstacle_borders[2], obstacle_borders[3]):
-                    self.map[i][j] = 'o'
+            for r in range(obstacle_borders[0], obstacle_borders[1]):
+                for c in range(obstacle_borders[2], obstacle_borders[3]):
+                    self.map[r][c] = 'o'
 
     # assign two available cells to be initial point and goal in a uniform distribution fashion
     def assign_initial_and_goal_positions(self):
