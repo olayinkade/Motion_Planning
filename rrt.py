@@ -24,10 +24,6 @@ class RRTNode:
         else:
             self.distance = new_parent.distance + new_parent.calculate_distance_to(self.location)
 
-    def get_move_unit_to(self, new_point: tuple) -> tuple:
-        distance = self.calculate_distance_to(new_point)
-        return (new_point[0] - self.location[0]) / distance, (new_point[1] - self.location[1]) / distance
-
     def check_obstacle_in_between(self, domain_simulation: DomainSimulation, end_point: tuple):
         new_tree_node = None
         distance = self.calculate_distance_to(end_point)
@@ -35,7 +31,8 @@ class RRTNode:
         if curr_step_length == 0:
             return new_tree_node
         else:
-            row_move, col_move = self.get_move_unit_to(end_point)
+            row_move = (end_point[0] - self.location[0]) / distance
+            col_move = (end_point[1] - self.location[1]) / distance
             for i in range(curr_step_length + 1):
                 change = i * curr_step_length / (curr_step_length + 1)
                 r = self.location[0] + int(change * row_move)
