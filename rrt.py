@@ -19,11 +19,15 @@ class RRTNode:
 
     def set_parent(self, new_parent):
         self.parent = new_parent
+
+    def set_distance(self):
         if self.parent is None:
             self.distance = float('inf')
         else:
-            self.distance = new_parent.distance + new_parent.calculate_distance_to(self.location)
+            self.distance = self.parent.distance + self.parent.calculate_distance_to(self.location)
 
+    # check to see if there is any obstacle between current point and a new point
+    # return None if it's next to an obstacle, return the furthest possible point on path otherwise (max step is 5)
     def check_obstacle_in_between(self, domain_simulation: DomainSimulation, end_point: tuple):
         new_tree_node = None
         distance = self.calculate_distance_to(end_point)
@@ -37,8 +41,6 @@ class RRTNode:
                 change = i * curr_step_length / (curr_step_length + 1)
                 r = self.location[0] + int(change * row_move)
                 c = self.location[1] + int(change * col_move)
-                # print("row move " + str(row_move) + ' - ' + str(col_move))
-                # print('** ' + str(change) + ' - ' + str(r) + ' - ' + str(c))
                 if domain_simulation.map[r][c] == 'o':
                     return new_tree_node
                 else:
@@ -65,29 +67,31 @@ def rrt_explore(domain_simulation: DomainSimulation):
     rrt_tree = RRTTree(domain_simulation.initial_pos, domain_simulation.goal_pos)
     rrt_tree.initial.distance = 0
     path_found = is_path_found(domain_simulation, rrt_tree)
+
     while not path_found:
-        # print('HERE')
         random_point = generate_random_point(domain_simulation)
         shortest_distance, nearest_node = float('inf'), None
+
         for curr_node in rrt_tree.nodes:
             distance = curr_node.calculate_distance_to(random_point.location)
             if distance < shortest_distance:
                 shortest_distance = distance
                 nearest_node = curr_node
         new_added_node = nearest_node.check_obstacle_in_between(domain_simulation, random_point.location)
+
         if new_added_node is not None:
             new_added_node.set_parent(nearest_node)
+            new_added_node.set_distance()
             rrt_tree.nodes.append(new_added_node)
 
         path_found = is_path_found(domain_simulation, rrt_tree)
 
     path = rrt_tree.get_path_backward()
-
-    point = path.pop()
+    last_connected_point = path.pop()
     for i in range(1, len(path) + 1):
         curr = path.pop()
-        show_path(domain_simulation, point.location, curr.location)
-        point = curr
+        show_path(domain_simulation, last_connected_point.location, curr.location)
+        last_connected_point = curr
     domain_simulation.print_map()
 
 
@@ -108,13 +112,13 @@ def is_path_found(domain_simulation: DomainSimulation, rrt_tree: RRTTree) -> boo
                 break
         if path_found:
             rrt_tree.goal.set_parent(last_node)
+            rrt_tree.goal.set_distance()
         return path_found
 
 
 def generate_random_point(domain_simulation: DomainSimulation) -> RRTNode:
     stop = False
     random_location = [0, 0]
-    # random_r, random_c = 0, 0
     while not stop:
         random_location[0] = int(random.uniform(0, SIZE - 1))
         random_location[1] = int(random.uniform(0, SIZE - 1))
