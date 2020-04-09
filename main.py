@@ -13,6 +13,7 @@ def main(argv=None):
     start_time = time.time()
     rrt.rrt_explore(domain)
     end_time = time.time()
+    domain.print_map()
     print('RRT took: ' + str(end_time - start_time) + 'seconds.')
 
 

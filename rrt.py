@@ -17,15 +17,6 @@ class RRTNode:
     def calculate_distance_to(self, new_point: tuple):
         return math.sqrt(math.pow(self.location[0] - new_point[0], 2) + math.pow(self.location[1] - new_point[1], 2))
 
-    def set_parent(self, new_parent):
-        self.parent = new_parent
-
-    def set_distance(self):
-        if self.parent is None:
-            self.distance = float('inf')
-        else:
-            self.distance = self.parent.distance + self.parent.calculate_distance_to(self.location)
-
     # check to see if there is any obstacle between current point and a new point
     # return None if it's next to an obstacle, return the furthest possible point on path otherwise (max step is 5)
     def check_obstacle_in_between(self, domain_simulation: DomainSimulation, end_point: tuple):
@@ -38,14 +29,25 @@ class RRTNode:
             row_move = (end_point[0] - self.location[0]) / distance
             col_move = (end_point[1] - self.location[1]) / distance
             for i in range(curr_step_length + 1):
-                change = i * curr_step_length / (curr_step_length + 1)
-                r = self.location[0] + int(change * row_move)
-                c = self.location[1] + int(change * col_move)
+                r, c = self.calculate_new_coordinate(row_move, col_move, curr_step_length, i)
                 if domain_simulation.map[r][c] == 'o':
                     return new_tree_node
                 else:
                     new_tree_node = RRTNode(None, (r, c))
             return new_tree_node
+
+    def calculate_new_coordinate(self, row_move: float, col_move: float, curr_step_length: int, index: int) -> tuple:
+        change = index * curr_step_length / (curr_step_length + 1)
+        return self.location[0] + int(change * row_move), self.location[1] + int(change * col_move)
+
+    def set_parent(self, new_parent):
+        self.parent = new_parent
+
+    def set_distance(self):
+        if self.parent is None:
+            self.distance = float('inf')
+        else:
+            self.distance = self.parent.distance + self.parent.calculate_distance_to(self.location)
 
 
 class RRTTree:
@@ -62,7 +64,11 @@ class RRTTree:
             curr_node = curr_node.parent
         return path
 
+    def add_node(self, new_node):
+        self.nodes.append(new_node)
 
+
+# RRT algorithm, given the domain simulation with initial point, goal and obstacles.
 def rrt_explore(domain_simulation: DomainSimulation):
     rrt_tree = RRTTree(domain_simulation.initial_pos, domain_simulation.goal_pos)
     rrt_tree.initial.distance = 0
@@ -80,19 +86,11 @@ def rrt_explore(domain_simulation: DomainSimulation):
         new_added_node = nearest_node.check_obstacle_in_between(domain_simulation, random_point.location)
 
         if new_added_node is not None:
-            new_added_node.set_parent(nearest_node)
-            new_added_node.set_distance()
-            rrt_tree.nodes.append(new_added_node)
+            set_new_tree_node(nearest_node, new_added_node, rrt_tree)
 
         path_found = is_path_found(domain_simulation, rrt_tree)
 
-    path = rrt_tree.get_path_backward()
-    last_connected_point = path.pop()
-    for i in range(1, len(path) + 1):
-        curr = path.pop()
-        show_path(domain_simulation, last_connected_point.location, curr.location)
-        last_connected_point = curr
-    domain_simulation.print_map()
+    connect_all_points(domain_simulation, rrt_tree)
 
 
 def is_path_found(domain_simulation: DomainSimulation, rrt_tree: RRTTree) -> bool:
@@ -116,6 +114,7 @@ def is_path_found(domain_simulation: DomainSimulation, rrt_tree: RRTTree) -> boo
         return path_found
 
 
+# generate a new random point on the map to be considered for the tree
 def generate_random_point(domain_simulation: DomainSimulation) -> RRTNode:
     stop = False
     random_location = [0, 0]
@@ -127,27 +126,28 @@ def generate_random_point(domain_simulation: DomainSimulation) -> RRTNode:
     return RRTNode(None, tuple(random_location))
 
 
+# draw out the path with appropriate arrow signs that represent the direction to take from initial point to goal
 def show_path(domain_simulation: DomainSimulation, point_1: tuple, point_2: tuple):
     if point_1[0] != point_2[0]:
-        slope = calculate_slope(point_1, point_2, True)
+        direction = calculate_slope(point_1, point_2, True)
         if point_1[0] >= point_2[0]:
             for i in range(0, point_1[0] - point_2[0]):
-                if domain_simulation.map[i+point_2[0]][int(point_1[1] + slope * ((i+point_2[0]) - point_1[0]))] == ' ':
-                    domain_simulation.map[i+point_2[0]][int(point_1[1] + slope * ((i+point_2[0]) - point_1[0]))] = '<'
+                if domain_simulation.map[i+point_2[0]][int(point_1[1] + direction * ((i+point_2[0]) - point_1[0]))] == ' ':
+                    domain_simulation.map[i+point_2[0]][int(point_1[1] + direction * ((i+point_2[0]) - point_1[0]))] = '<'
         else:
             for i in range(0, point_2[0] - point_1[0]):
-                if domain_simulation.map[i+point_1[0]][int(point_2[1] + slope * ((i+point_1[0]) - point_2[0]))] == ' ':
-                    domain_simulation.map[i+point_1[0]][int(point_2[1] + slope * ((i+point_1[0]) - point_2[0]))] = '>'
+                if domain_simulation.map[i+point_1[0]][int(point_2[1] + direction * ((i+point_1[0]) - point_2[0]))] == ' ':
+                    domain_simulation.map[i+point_1[0]][int(point_2[1] + direction * ((i+point_1[0]) - point_2[0]))] = '>'
     if point_1[1] != point_2[1]:
-        slope = calculate_slope(point_1, point_2, False)
+        direction = calculate_slope(point_1, point_2, False)
         if point_1[1] >= point_2[1]:
             for i in range(0, point_1[1] - point_2[1]):
-                if domain_simulation.map[int(point_1[0] + slope * ((i+point_2[1]) - point_1[1]))][i+point_2[1]] == ' ':
-                    domain_simulation.map[int(point_1[0] + slope * ((i+point_2[1]) - point_1[1]))][i+point_2[1]] = '^'
+                if domain_simulation.map[int(point_1[0] + direction * ((i+point_2[1]) - point_1[1]))][i+point_2[1]] == ' ':
+                    domain_simulation.map[int(point_1[0] + direction * ((i+point_2[1]) - point_1[1]))][i+point_2[1]] = '^'
         else:
             for i in range(0, point_2[1] - point_1[1]):
-                if domain_simulation.map[int(point_2[0] + slope * ((i+point_1[1]) - point_2[1]))][i+point_1[1]] == ' ':
-                    domain_simulation.map[int(point_2[0] + slope * ((i+point_1[1]) - point_2[1]))][i+point_1[1]] = 'v'
+                if domain_simulation.map[int(point_2[0] + direction * ((i+point_1[1]) - point_2[1]))][i+point_1[1]] == ' ':
+                    domain_simulation.map[int(point_2[0] + direction * ((i+point_1[1]) - point_2[1]))][i+point_1[1]] = 'v'
 
 
 # calculate the slope between two points
@@ -156,3 +156,19 @@ def calculate_slope(point_1: tuple, point_2: tuple, x_diff: bool) -> float:
         return (point_2[1] - point_1[1]) / (point_2[0] - point_1[0])
     else:
         return (point_2[0] - point_1[0]) / (point_2[1] - point_1[1])
+
+
+def set_new_tree_node(nearest_node: RRTNode, new_added_node: RRTNode, rrt_tree: RRTTree):
+    new_added_node.set_parent(nearest_node)
+    new_added_node.set_distance()
+    rrt_tree.add_node(new_added_node)
+
+
+# connect all the points in on found path between initial point and goal
+def connect_all_points(domain_simulation: DomainSimulation, rrt_tree: RRTTree):
+    path = rrt_tree.get_path_backward()
+    last_connected_point = path.pop()
+    for i in range(1, len(path) + 1):
+        curr = path.pop()
+        show_path(domain_simulation, last_connected_point.location, curr.location)
+        last_connected_point = curr

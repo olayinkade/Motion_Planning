@@ -1,12 +1,12 @@
 import random
 import numpy as np
 
-# from rrt import rrt_explore
-import rrt
+
 SIZE = 100
 
 
 class DomainSimulation:
+
     # initialize the domain map, assume the size is 100
     def __init__(self):
         self.initial_pos = (0, 0)
@@ -58,6 +58,3 @@ class DomainSimulation:
                 else:
                     print(self.map[i][j], end='')
             print()
-
-
-
