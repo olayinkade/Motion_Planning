@@ -1,7 +1,8 @@
 import random
 import numpy as np
 
-
+# from rrt import rrt_explore
+import rrt
 SIZE = 100
 
 
@@ -13,7 +14,7 @@ class DomainSimulation:
         self.map = [[' ' for i in range(SIZE)] for j in range(SIZE)]
 
     # randomly generate obstacles for the map, given the number of required obstacles.
-    def place_obstacles(self, num_obstacles):
+    def place_obstacles(self, num_obstacles: int):
         for _ in range(num_obstacles):
             obstacle_centre = (random.randint(0, SIZE), random.randint(0, SIZE))
             obstacle_size = (random.randint(10, 50), random.randint(10, 50))
@@ -59,7 +60,4 @@ class DomainSimulation:
             print()
 
 
-domain = DomainSimulation()
-domain.place_obstacles(5)
-domain.assign_initial_and_goal_positions()
-domain.print_map()
+
