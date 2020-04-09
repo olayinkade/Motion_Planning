@@ -1,0 +1,8 @@
+IMPLEMENTATION OF RRT:
+This is the implementation of a standard single source RRT algorithm, where for every new node generated, an appropriate
+node will be added to the nearest node and the new node becomes the nearest node's child.
+The length of the connection between the tree and the new generated point is limited by a growth factor. Every time a
+new point is generated, the path between it and the nearest node in the tree will be checked to see if it passes through
+any obstacles on the map. If the answer is yes, then another check will be performed to see with a max step of 5, can we
+place any other point on that path to add it to the tree at the nearest node. If the asnwer is still no, a different
+random point will be generated.
