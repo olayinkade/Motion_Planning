@@ -27,6 +27,8 @@ def main(argv=None):
     rrt_domain.print_map()
     print('RRT took: ' + str(end_time - start_time) + 'seconds.')
 
+    draw_map(quadtree_domain, obs_list, rrt_domain.map)
+
 
 def quad_tree_and_fbsp(obs_list, domain, alg):
     width = 10.0
@@ -58,6 +60,33 @@ def quad_tree_and_fbsp(obs_list, domain, alg):
     qtd.Draw(ax)
     n = qtd.CountCells()
     ax.set_title(alg + ' Decomposition\n{0} cells'.format(n))
+    plt.show()
+
+
+def draw_map(domain, obs_list, map):
+    width = 10.0
+    height = 10.0
+
+    pp = PathPlanningProblem(width, height, 20, 3.0, 1, obs_list)
+    initial = (domain.initial_pos[0] / 10.0, (10.0 - (domain.initial_pos[1] / 10.0)))
+    goals = (domain.goal_pos[0] / 10.0, (10.0 - (domain.goal_pos[1] / 10.0)))
+
+    ax = plt.subplot(111)
+    ax.set_xlim(0.0, width)
+    ax.set_ylim(0.0, height)
+
+    qtd = QuadTreeDecomposition(pp, 0.2)
+    ip = plt.Rectangle((initial[0], initial[1]), 0.1, 0.1, facecolor='#8B0000')
+    ax.add_patch(ip)
+    ip = plt.Rectangle((goals[0], goals[1]), 0.1, 0.1, facecolor='#228B22')
+    ax.add_patch(ip)
+
+    for i in range(len(map[0])):
+        for j in range(len(map[0])):
+            if map[i][j] != 'o' and map[i][j] != ' ' and map[i][j] != 'I' and map[i][j] != 'G':
+                ip = plt.Rectangle((i/10.0, (10 - (j/10.0))), 0.1, 0.1, facecolor='#FFA500')
+                ax.add_patch(ip)
+    qtd.Draw(ax)
     plt.show()
 
 if __name__ == '__main__':
