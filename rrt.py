@@ -91,6 +91,7 @@ def rrt_explore(domain_simulation: DomainSimulation):
         path_found = is_path_found(domain_simulation, rrt_tree)
 
     connect_all_points(domain_simulation, rrt_tree)
+    return domain_simulation
 
 
 def is_path_found(domain_simulation: DomainSimulation, rrt_tree: RRTTree) -> bool:

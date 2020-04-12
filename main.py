@@ -14,16 +14,15 @@ def main(argv=None):
     domain.assign_initial_and_goal_positions()
     domain.print_map()
 
-    # TODO: ***** FOR YINKA!!!! **** USE THE SAME domain TO TEST QUADTREE HERE
-    # TODO: work with quadtree_domain instead of original one (domain)
     quadtree_domain = copy.deepcopy(domain)
     quad_tree_and_fbsp(obs_list,quadtree_domain, 'QUADTREE')
     quad_tree_and_fbsp(obs_list, quadtree_domain, 'FBSP TREE')
+    
     rrt_domain = copy.deepcopy(domain)
     print('> FINDING PATH USING RRT ALGORITHM...')
     print('RRT result:')
     start_time = time.time()
-    rrt.rrt_explore(rrt_domain)
+    rrt_domain = rrt.rrt_explore(rrt_domain)
     end_time = time.time()
     rrt_domain.print_map()
     print('RRT took: ' + str(end_time - start_time) + 'seconds.')
