@@ -24,11 +24,11 @@ class CellDecomposition:
                     r.set_fill(True)
                     r.set_facecolor(color)
             elif ( node[1] == 'free' ):
-                color = '#ffff00'
+                color = '#FFFFFF'
                 r.set_fill(True)
                 r.set_facecolor(color)
             elif ( node[1] == 'obstacle'):
-                color = '#ffffff'
+                color = '#904209'
                 r.set_fill(True)
                 r.set_facecolor(color)
             elif node[1] == 'free initial':

@@ -18,7 +18,7 @@ class DomainSimulation:
         obstacles = []
         for _ in range(num_obstacles):
             obstacle_centre = (random.randint(0, SIZE), random.randint(0, SIZE))
-            obstacle_size = (random.randint(10, 30), random.randint(10, 30))
+            obstacle_size = (random.randint(10, 15), random.randint(10, 15))
             half_width, half_height = int(obstacle_size[0]/2), int(obstacle_size[1]/2)
             # the limit/borders of the obstacle in the form of (top, bottom, left, right)
             obstacle_borders = (max(0, obstacle_centre[0] - half_width), min(SIZE, obstacle_centre[0] + half_width),
