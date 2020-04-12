@@ -1,5 +1,3 @@
-__author__ = 'Jacky Baltes <jacky@cs.umanitoba.ca>'
-
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,17 +51,23 @@ class CellDecomposition:
                 self.Draw(ax, c)
 
     def find_initial_state(self, initial, curr_string):
-        curr = self.free_cell[0]
-        distance = math.sqrt(((initial[0]-curr[0].x)**2)+((initial[1]-curr[0].y)**2))
-        for i in range(len(self.free_cell)-1):
-            new_dist = math.sqrt(((initial[0]-self.free_cell[i+1][0].x)**2)+((initial[1]-self.free_cell[i+1][0].y)**2))
-            if new_dist < distance:
-                distance = new_dist
-                curr = self.free_cell[i+1]
+        found = False
+        for cell in self.free_cell:
+                top_right = (cell[0].x + cell[0].width, cell[0].y + cell[0].height)
+                if find_point(cell[0].x, cell[0].y, top_right[0], top_right[1], initial[0], initial[1]):
+                    found = True
+                    curr = cell
+        if not found:
+            curr = self.free_cell[0]
+            distance = math.sqrt(((initial[0]-curr[0].x)**2)+((initial[1]-curr[0].y)**2))
+            for i in range(len(self.free_cell)-1):
+                new_dist = math.sqrt(((initial[0]-self.free_cell[i+1][0].x)**2)+((initial[1]-self.free_cell[i+1][0].y)**2))
+                if new_dist < distance:
+                    distance = new_dist
+                    curr = self.free_cell[i+1]
 
         curr[1] = curr_string
         return curr
-
 
 
     def find_free_cell(self, node=None):
@@ -317,8 +321,6 @@ def astar(initial, goal, free_cells):
         temp_child = generate_neigbours(curr.cell, free_cells)
         for item in temp_child:
             children.append(node(curr, item))
-        if len(children) < 1:
-            print("no solution algorithm stock")
 
         if curr == end_node or end_node in children:
             path = []
@@ -345,53 +347,5 @@ def astar(initial, goal, free_cells):
                     continue
 
             open_list.append(child)
-
-def main( argv = None ):
-    if ( argv == None ):
-        argv = sys.argv[1:]
-
-    width = 10.0
-    height = 10.0
-
-    pp = PathPlanningProblem(width, height, 20, 3.0, 1)
-    initial, goals = pp.CreateProblemInstance()
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1,2,1, aspect='equal')
-    ax.set_xlim(0.0, width)
-    ax.set_ylim(0.0, height)
-
-    for o in pp.obstacles:
-        ax.add_patch(copy.copy(o.patch))
-
-    qtd = QuadTreeDecomposition(pp, 0.2)
-    qtd.find_free_cell()
-    initial_state = qtd.find_initial_state(initial, "free initial")
-    goal_state = qtd.find_initial_state(goals[0], "free goal")
-    astar(initial_state, goal_state, qtd.free_cell)
-    qtd.Draw(ax)
-    n = qtd.CountCells()
-    ax.set_title('Quadtree Decomposition\n{0} cells'.format(n))
-
-    ax = fig.add_subplot(1,2,2, aspect='equal')
-    ax.set_xlim(0.0, width)
-    ax.set_ylim(0.0, height)
-
-    for o in pp.obstacles:
-        ax.add_patch(copy.copy(o.patch))
-
-    bsp = BinarySpacePartitioning(pp, 0.2)
-    bsp.find_free_cell()
-    initial_state = bsp.find_initial_state(initial, "free initial")
-    goal_state = bsp.find_initial_state(goals[0], "free goal")
-    astar(initial_state, goal_state, bsp.free_cell)
-    bsp.Draw(ax)
-    n = bsp.CountCells()
-    ax.set_title('FBSP Decomposition\n{0} cells'.format(n))
-    plt.show()
-
-
-if  __name__ == '__main__' :
-    main()
 
 

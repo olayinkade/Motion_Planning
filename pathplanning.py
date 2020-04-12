@@ -1,4 +1,3 @@
-__author__ = 'Jacky Baltes <jacky@cs.umanitoba.ca>'
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,10 +47,10 @@ class Obstacle(Rectangle):
             self.patch = plt.Rectangle((self.x, self.y), self.width, self.height, facecolor=color, edgecolor='#202020')
 
 class PathPlanningProblem:
-    def __init__(self, width, height, onum, owidth, oheight):
+    def __init__(self, width, height, onum, owidth, oheight, obs_list):
         self.width = width
         self.height = height
-        self.obstacles = self.CreateObstacles(onum, owidth, oheight)
+        self.obstacles = self.use_obstacles(obs_list)
 
     def CreateObstacles(self, onum, owidth, oheight):
         obstacles = []
@@ -121,5 +120,23 @@ class PathPlanningProblem:
             j = int(p[0]/dim)
             counts[j][i] = counts[j][i] + 1
         return (x,y,counts)
+
+    def use_obstacles(self, obs_list):
+        obstacles = []
+        for ob in obs_list:
+            x = (ob[0][0] - ob[1])/10.0
+            y = (10.0 - ((ob[0][1] + ob[2])/10.0))
+            w = (ob[1]*2)/10.0
+            h = (ob[2]*2)/10.0
+            if (x + w) > self.width:
+                w = self.width - x
+            if (y + h) > self.height:
+                h = self.height - y
+            obs = Obstacle(x, y, w, h, '#808080')
+            obstacles = obstacles + [obs]
+        return obstacles
+
+
+
 
 
