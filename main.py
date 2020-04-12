@@ -17,7 +17,7 @@ def main(argv=None):
     quadtree_domain = copy.deepcopy(domain)
     quad_tree_and_fbsp(obs_list,quadtree_domain, 'QUADTREE')
     quad_tree_and_fbsp(obs_list, quadtree_domain, 'FBSP TREE')
-    
+
     rrt_domain = copy.deepcopy(domain)
     print('> FINDING PATH USING RRT ALGORITHM...')
     print('RRT result:')
