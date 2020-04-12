@@ -1,3 +1,12 @@
+IMPLEMENTATION OF QUADTREE and FBSP
+I use the decompose method to determine the free cells
+To generate the initial and goal position I generate random point on the map and use that point to find the next closest free cell. I do that by checking the distance between the point and the Center of the rectangle.
+To generate the neighbours for each free cell I use a naive approach. I extent 16 points out of the rectangle. 8 in the corners to help notice diagonal squares. Other eight to help determine if a box is on top, below, right and left.
+Using the algorithm to generate neighbours I run astar.
+G(n) is the amount of parent nodes
+H(n) is  the distance between the Center of the current node and the end node.
+Once I have a path I change the state name of each path cell to “free path” to help me outline the path taken
+
 IMPLEMENTATION OF RRT:
 This is the implementation of a standard single source RRT algorithm, where for every new node generated, an appropriate
 node will be added to the nearest node and the new node becomes the nearest node's child.
